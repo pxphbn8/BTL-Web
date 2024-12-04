@@ -1,0 +1,17 @@
+import express from 'express';
+import path from 'path';
+
+const app = express();
+
+// Cấu hình để phục vụ tệp tĩnh từ thư mục 'public' hoặc 'build' nếu bạn sử dụng React
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Định nghĩa route cho trang chủ '/'
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));  // Đảm bảo rằng có file index.html trong thư mục public
+});
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
