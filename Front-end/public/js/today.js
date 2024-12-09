@@ -1,5 +1,4 @@
 let tasks;
-
 // Script để gọi API từ server
 document.addEventListener('DOMContentLoaded', () => {
   fetchDataFromServer();
@@ -92,10 +91,6 @@ async function fetchDataFromServer() {
 
       const modalUpdate = createModal('modalUpdate' + index, 'Update Task', task);
       taskContainer.appendChild(modalUpdate);
-
-      // Loại bỏ modal delete
-      // const modalDelete = createModal('modalDelete' + index, 'Delete Task', task);
-      // taskContainer.appendChild(modalDelete);
 
       // Thêm modal đính kèm
       const attachmentModal = createAttachmentModal('attachmentModal' + index, task);
@@ -210,7 +205,6 @@ function handleFileUpload(file, task) {
     console.log('No file selected');
   }
 }
-
 
 function createInput(labelText, inputType, value) {
     const inputDiv = document.createElement('div');
