@@ -39,7 +39,6 @@ export const addComment = async (req, res) => {
   }
 };
 
-
 // Xóa một bình luận
 export const deleteComment = async (req, res) => {
   try {
