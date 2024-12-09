@@ -1,4 +1,4 @@
-import Comment from '../models/CommentModel.js'; // Import model tương ứng
+import Comment from '../models/CommentModel.js'; 
 
 // Lấy tất cả các bình luận của một người dùng
 export const getAllComments = async (req, res) => {
