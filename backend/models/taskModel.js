@@ -17,6 +17,7 @@ const taskSchema = new mongoose.Schema({
     set: (value) => new Date(value) // Chuyển đổi chuỗi ngày tháng năm thành đối tượng Date
   },
   isCompleted: Boolean,
+  comment: [],
 }, { timestamps: true });
 
 const Task = mongoose.model('Task', taskSchema);

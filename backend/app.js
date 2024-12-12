@@ -12,8 +12,10 @@ import loginRoutes from './routes/loginRoute.js';
 import signupRoutes from './routes/signupRoute.js';
 import todayRoutes from './routes/todayRoute.js';
 import searchRoutes from './routes/searchRoute.js';
-import commentRoute from './routes/commentRoute.js';
+import commentRoutes from './routes/commentRoute.js';
+// import Routes from './routes/uploadFileRoute.js';
 const app = express();
+
 
 // Cấu hình CORS theo nhu cầu của bạn
 app.use(cors());
@@ -45,7 +47,8 @@ app.use('/api/login', loginRoutes);
 app.use('/api/signup', signupRoutes);
 app.use('/api/today', todayRoutes);
 app.use('/api/search', searchRoutes);
-app.use('/api/comments', commentRoute);
+app.use('/api/comments', commentRoutes);
+// app.use('/api/uploadFile', Routes);
 
 
 // Bình thường bạn sẽ muốn phục vụ static files cho Front-end ở đây

@@ -1,287 +1,214 @@
 let tasks;
 
-// Script để gọi API từ server
-document.addEventListener('DOMContentLoaded', () => {
-  fetchDataFromServer();
-});
+document.addEventListener('DOMContentLoaded', fetchDataFromServer);
 
 async function fetchDataFromServer() {
   try {
     const userID = localStorage.getItem('userID');
     const response = await fetch(`http://localhost:3001/api/today/getToday/${userID}`);
-    const responseData = await response.json();
+    tasks = await response.json();
 
-    if (Array.isArray(responseData)) {
-      tasks = responseData;
-    } else if (typeof responseData === 'object') {
-      tasks = [responseData];
-    } else {
-      console.error('Data from server is not an array or object:', responseData);
-      return;
-    }
-
-    const taskContainer = document.getElementById('taskContainer');
-    taskContainer.innerHTML = ''; // Xóa nội dung cũ trước khi thêm công việc mới
-
-    tasks.forEach((task, index) => {
-      const taskDiv = document.createElement('div');
-      taskDiv.classList.add('task');
-
-      const taskInfoDiv = document.createElement('div');
-      taskInfoDiv.classList.add('taskInfo');
-      taskInfoDiv.innerHTML = `
-        <strong>${task.title}</strong><br>
-        Due Date: ${task.dueDate}<br>
-        Description: ${task.description}
-      `;
-
-      taskDiv.appendChild(taskInfoDiv);
-
-      // Kiểm tra nếu công việc đã đến hạn hoặc sắp đến hạn
-      const dueDate = new Date(task.dueDate);
-      const currentDate = new Date();
-      const daysLeft = Math.floor((dueDate - currentDate) / (1000 * 60 * 60 * 24));
-
-      const statusDiv = document.createElement('div');
-      statusDiv.classList.add('status');
-    
-      if (task.isImportant) {
-        const importantSpan = document.createElement('span');
-        importantSpan.classList.add('important_task');
-        importantSpan.textContent = 'important';
-        statusDiv.appendChild(importantSpan);
-      }
-        
-      // Thêm biểu tượng thông báo nếu công việc đã đến hạn
-      if (daysLeft <= 2 && !task.isCompleted) {
-        const alertIcon = document.createElement('span');
-        alertIcon.classList.add('bi');
-        alertIcon.classList.add('bi-exclamation-triangle');
-        alertIcon.classList.add('alert-icon');  // Thêm lớp CSS để tùy chỉnh biểu tượng
-        statusDiv.appendChild(alertIcon);
-      }
-      
-      if (task.isCompleted) {
-        const completedSpan = document.createElement('span');
-        completedSpan.classList.add('completed_task');
-        completedSpan.textContent = 'completed';
-        statusDiv.appendChild(completedSpan);
-      }
-      taskDiv.appendChild(statusDiv);
-
-      const actionButtonsDiv = document.createElement('div');
-      actionButtonsDiv.classList.add('action-buttons');
-
-      const updateButton = document.createElement('button');
-      updateButton.classList.add('update');
-      updateButton.textContent = 'Update';
-      updateButton.addEventListener('click', () => openModal('modalUpdate' + index));
-      actionButtonsDiv.appendChild(updateButton);
-
-      const deleteButton = document.createElement('button');
-      deleteButton.classList.add('delete');
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', () => openModal('modalDelete' + index));
-      actionButtonsDiv.appendChild(deleteButton);
-
-      // Thêm nút Attachment nếu chưa hoàn thành
-      if (!task.isCompleted) {
-        const attachmentButton = document.createElement('button');
-        attachmentButton.classList.add('attachment');
-        attachmentButton.textContent = 'Attachment';
-        attachmentButton.addEventListener('click', () => openModal('attachmentModal' + index));
-        actionButtonsDiv.appendChild(attachmentButton);
-      }
-
-      taskDiv.appendChild(actionButtonsDiv);
-      taskContainer.appendChild(taskDiv);
-
-      const modalUpdate = createModal('modalUpdate' + index, 'Update Task', task);
-      taskContainer.appendChild(modalUpdate);
-
-      const modalDelete = createModal('modalDelete' + index, 'Delete Task', task);
-      taskContainer.appendChild(modalDelete);
-
-      // Thêm modal đính kèm
-      const attachmentModal = createAttachmentModal('attachmentModal' + index, task);
-      taskContainer.appendChild(attachmentModal);
-    });
-
+    tasks = Array.isArray(tasks) ? tasks : [tasks];
+    renderTasks();
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 }
 
+function renderTasks() {
+  const taskContainer = document.getElementById('taskContainer');
+  taskContainer.innerHTML = '';
 
-// Hàm tạo modal đính kèm tệp
-function createAttachmentModal(modalId, task) {
-    const modal = document.createElement('div');
-    modal.classList.add('modal');
-    modal.id = modalId;
+  tasks.forEach((task, index) => {
+    const taskDiv = createElement('div', { class: 'task' }, [
+      createTaskInfo(task),
+      createTaskStatus(task),
+      createActionButtons(task, index),
+      createModal(`modalUpdate${index}`, 'Update Task', task, index),
+      createAttachmentModal(`attachmentModal${index}`, task),
+    ]);
 
-    const modalContent = document.createElement('div');
-    modalContent.classList.add('modal-content');
-
-    const closeSpan = document.createElement('span');
-    closeSpan.className = 'close';
-    closeSpan.innerHTML = '&times;';
-    closeSpan.addEventListener('click', () => closeModal(modalId));
-    modalContent.appendChild(closeSpan);
-
-    const modalTitleDiv = document.createElement('h2');
-    modalTitleDiv.textContent = 'Attach File';
-    modalContent.appendChild(modalTitleDiv);
-
-    // Form cho file đính kèm
-    const attachmentForm = document.createElement('form');
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.id = 'attachmentFile';
-
-    const uploadButton = document.createElement('button');
-    uploadButton.textContent = 'Upload';
-    uploadButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      handleFileUpload(fileInput.files[0], task);
-    });
-
-    attachmentForm.appendChild(fileInput);
-    attachmentForm.appendChild(uploadButton);
-    modalContent.appendChild(attachmentForm);
-    modal.appendChild(modalContent);
-
-    return modal;
+    taskContainer.appendChild(taskDiv);
+  });
 }
 
+function createTaskInfo(task) {
+  return createElement('div', { class: 'taskInfo' }, [
+    createElement('strong', {}, task.title),
+    createElement('div', {}, `Due Date: ${task.dueDate}`),
+    createElement('div', {}, `Description: ${task.description}`)
+  ]);
+}
 
-// Hàm tạo modal cho việc cập nhật và xóa
-function createModal(modalId, modalTitle, task) {
-  const modal = document.createElement('div');
-  modal.classList.add('modal');
-  modal.id = modalId;
+function createTaskStatus(task) {
+  const statusDiv = createElement('div', { class: 'status' });
 
-  const modalContent = document.createElement('div');
-  modalContent.classList.add('modal-content');
-
-  const closeSpan = document.createElement('span');
-  closeSpan.className = 'close';
-  closeSpan.innerHTML = '&times;';
-  closeSpan.addEventListener('click', () => closeModal(modalId));
-  modalContent.appendChild(closeSpan);
-
-  const modalTitleDiv = document.createElement('h2');
-  modalTitleDiv.textContent = modalTitle;
-  modalContent.appendChild(modalTitleDiv);
-
-  // Tạo form cho modal (tùy vào nội dung mà bạn muốn hiển thị khi Update hoặc Delete)
-  if (modalTitle === 'Update Task') {
-      const updateForm = document.createElement('form');
-      
-      // Add các trường cập nhật (title, dueDate, description,...)
-      updateForm.appendChild(createInput('Title', 'text', task.title));
-      updateForm.appendChild(createInput('Due Date', 'date', task.dueDate));
-      updateForm.appendChild(createInput('Description', 'text', task.description));
-      
-      const saveButton = document.createElement('button');
-      saveButton.textContent = 'Save';
-      saveButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          // Cập nhật trạng thái 'completed' sau khi ấn Save
-          task.isCompleted = true;
-          console.log(`Task ${task.title} is now completed.`);
-          // Sau khi cập nhật, cần cập nhật lại giao diện (tasks)
-          updateTaskStatus(task);
-          closeModal(modalId);
-      });
-      updateForm.appendChild(saveButton);
-      modalContent.appendChild(updateForm);
-  } else if (modalTitle === 'Delete Task') {
-      const deleteMessage = document.createElement('p');
-      deleteMessage.textContent = `Are you sure you want to delete the task: "${task.title}"?`;
-      modalContent.appendChild(deleteMessage);
-
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          // Gọi hàm xóa task tại đây
-          console.log(`Deleting task: ${task.title}`);
-          closeModal(modalId);
-      });
-      modalContent.appendChild(deleteButton);
+  if (task.isImportant) {
+    statusDiv.appendChild(createElement('span', { class: 'important_task' }, 'important'));
   }
 
-  modal.appendChild(modalContent);
-  return modal;
+  const daysLeft = Math.floor((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
+  if (daysLeft <= 2 && !task.isCompleted) {
+    statusDiv.appendChild(createElement('span', { class: 'bi bi-exclamation-triangle alert-icon' }));
+  }
+
+  if (task.isCompleted) {
+    statusDiv.appendChild(createElement('span', { class: 'completed_task' }, 'completed'));
+  }
+
+  return statusDiv;
 }
 
-// Hàm xử lý file upload
-function handleFileUpload(file, task) {
+function createActionButtons(task, index) {
+  const actionDiv = createElement('div', { class: 'action-buttons' });
+
+  actionDiv.appendChild(createButton('Update', 'update', () => openModal(`modalUpdate${index}`)));
+
+  if (!task.isCompleted) {
+    actionDiv.appendChild(createButton('Attachment', 'attachment', () => openModal(`attachmentModal${index}`)));
+  }
+
+  return actionDiv;
+}
+
+function createModal(modalId, modalTitle, task, index) {
+  return createElement('div', { class: 'modal', id: modalId }, [
+    createElement('div', { class: 'modal-content' }, [
+      createElement('span', { class: 'close', onclick: () => closeModal(modalId) }, '&times;'),
+      createElement('h2', {}, modalTitle),
+      createModalForm(task, modalId)
+    ])
+  ]);
+}
+
+function createAttachmentModal(modalId, task) {
+  return createElement('div', { class: 'modal', id: modalId }, [
+    createElement('div', { class: 'modal-content' }, [
+      createElement('span', { class: 'close', onclick: () => closeModal(modalId) }, '&times;'),
+      createElement('h2', {}, 'Attach File'),
+      createAttachmentForm(task)
+    ])
+  ]);
+}
+
+function createModalForm(task, modalId) {
+  const form = createElement('form', {}, [
+    createInput('Title', 'text', task.title, task._id),
+    createInput('Is Completed', 'checkbox', task.isCompleted, task._id),
+    createButton('Save', '', (e) => {
+      e.preventDefault();
+      updateTaskStatus(task._id, {
+        title: document.getElementById(`title-${task._id}`).value,
+        isCompleted: document.getElementById(`is-completed-${task._id}`).checked,
+      });
+      closeModal(modalId);
+    })
+  ]);
+
+  return form;
+}
+
+function createAttachmentForm(task) {
+  return createElement('form', {}, [
+    createElement('input', { type: 'file', id: 'attachmentFile' }),
+    createButton('Upload', '', (e) => {
+      e.preventDefault();
+      const file = document.getElementById('attachmentFile').files[0];
+      handleFileUpload(file, task);
+    })
+  ]);
+}
+
+async function updateTaskStatus(taskId, updatedData) {
+  try {
+    const response = await fetch(`http://localhost:3001/api/tasks/update/${taskId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedData),
+    });
+    console.log('Task updated:', await response.json());
+    fetchDataFromServer(); // Reload tasks
+  } catch (error) {
+    console.error('Error updating task:', error);
+  }
+}
+
+async function handleFileUpload(file, task) {
   if (file) {
-    console.log(`Uploading file: ${file.name} for task: ${task.title}`);
-    // Thực hiện thao tác upload tại đây
+    try {
+      console.log(`Uploading file: ${file.name} for task: ${task.title}`);
+
+      const formData = new FormData();
+      formData.append('file', file); // Thêm tệp vào form data
+      formData.append('fileName', file.name); // Tên file (có thể lấy từ input hoặc thêm thông tin khác nếu cần)
+
+      const userID = localStorage.getItem('userID'); // Lấy userID từ localStorage
+
+      // Gửi tệp qua API để upload
+      const response = await fetch('http://localhost:3001/api/uploadFile/uploadfile', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${userID}` // Gửi userID (nếu có trong server)
+        },
+        body: formData,
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        console.log('File uploaded successfully:', data);
+        updateTaskStatus(task._id, { isCompleted: true }); // Cập nhật task là đã hoàn thành
+        fetchDataFromServer(); // Reload tasks
+      } else {
+        console.error('Error uploading file:', data.message);
+      }
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    }
   } else {
     console.log('No file selected');
   }
 }
 
-function createInput(labelText, inputType, value) {
-    const inputDiv = document.createElement('div');
-    const label = document.createElement('label');
-    label.textContent = labelText + ':';
-    inputDiv.appendChild(label);
 
-    const input = document.createElement('input');
-    input.type = inputType;
-    if(input.type==='checkbox') {
-        if(value===1) {input.value=true;}
-        else {input.value=false;}
+// Utility functions
+function createElement(tag, attrs = {}, content = '') {
+  const elem = document.createElement(tag);
+  for (const [key, value] of Object.entries(attrs)) {
+    if (key.startsWith('on')) {
+      elem[key] = value;
     } else {
-        input.value = value;
+      elem.setAttribute(key, value);
     }
-
-    switch (labelText) {
-        case "Title":
-            input.id = "title";
-            break;
-        case "Due Date":
-            input.id = "dueDate";
-            break;
-        case "Description":
-            input.id = "description";
-            break;
-        case "Is Important":
-            input.id = "isImportant";
-            break;
-        default:
-            input.id = 'isCompleted';
-    }
-    
-    inputDiv.appendChild(input);
-
-    return inputDiv;
+  }
+  if (Array.isArray(content)) {
+    content.forEach(child => elem.appendChild(child));
+  } else {
+    elem.innerHTML = content;
+  }
+  return elem;
 }
 
-function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'block';
+function createButton(text, className, onClick) {
+  return createElement('button', { class: className, onclick: onClick }, text);
 }
 
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'none';
+function createInput(labelText, inputType, value, taskId) {
+  return createElement('div', {}, [
+    createElement('label', {}, `${labelText}:`),
+    createElement('input', {
+      type: inputType,
+      id: `${labelText.toLowerCase().replace(' ', '-')}-${taskId}`,
+      ...(inputType === 'checkbox' ? { checked: value } : { value }),
+    })
+  ]);
 }
 
-// Hàm cập nhật trạng thái của task
-function updateTaskStatus(task) {
-    const taskContainer = document.getElementById('taskContainer');
-    taskContainer.innerHTML = ''; // Clear previous tasks
+function openModal(id) {
+  document.getElementById(id).style.display = 'block';
+}
 
-    tasks.forEach((t, index) => {
-      if (t === task) {
-        t.isCompleted = true; // Mark this task as completed
-      }
-    });
-
-    fetchDataFromServer();  // Re-fetch data to update the tasks display
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
 }

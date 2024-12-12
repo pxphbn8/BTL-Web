@@ -250,6 +250,28 @@
   margin-left: 15px; /* Điều chỉnh giá trị để dịch icon sang phải */
 }
 
+.file-box,
+  .sidebar-frame {
+    display: flex;
+    align-items:flex-start;
+    justify-content: flex-start;
+    box-sizing: border-box;
+  }
+
+  .file-box {
+    border-radius: var(--br-3xs);
+    background-color: #EBD9B4;
+    width: 100%;
+    flex-direction: row; /* Giữ nguyên để icon và chữ nằm trên cùng một hàng */
+    padding: var(--padding-7xs) var(--padding-base) var(--padding-6xs);
+    gap: 55px; /* Tăng giá trị gap để tạo khoảng cách lớn hơn */
+    /* z-index: 1; */
+  }
+  .file-box i {
+    margin-left: 15px; /* Điều chỉnh giá trị để dịch icon sang phải */
+  }
+  
+
 .search-box,
 .sidebar-frame {
   display: flex;

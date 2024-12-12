@@ -12,6 +12,17 @@ export const getAllTasks = async (req, res) => {
   }
 };
 
+export const getTaskById = async (req, res) => {
+  try {
+    const taskId = req.params.id;
+    const task = await Task.find({task_id: taskId});
+    console.log(task)
+    res.status(200).json(task);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
 export const createTask = async (req, res) => {
   const task = new Task(req.body);
   task.task_id = task._id;

@@ -1,4 +1,3 @@
-
 let tasks;
 
 // Script để gọi API từ server
@@ -9,212 +8,259 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchDataFromServer() {
   try {
     const userID = localStorage.getItem('userID');
-
     const response = await fetch(`http://localhost:3001/api/completed/getCompleted/${userID}`);
     const responseData = await response.json();
 
-    // Kiểm tra xem responseData có phải là mảng hay không
-    if (Array.isArray(responseData)) {
-      tasks = responseData;
-    } else if (typeof responseData === 'object') {
-      // Nếu là đối tượng, tạo một mảng chứa đối tượng đó
-      tasks = [responseData];
-    } else {
-      console.error('Data from server is not an array or object:', responseData);
+    if (!Array.isArray(responseData) && typeof responseData !== 'object') {
+      console.error('Data from server is not in the expected format:', responseData);
       return;
     }
 
-    // Xử lý dữ liệu nhận được từ server
-    console.log('Data from server:', tasks);
+    tasks = Array.isArray(responseData) ? responseData : [responseData];
 
-    // Hiển thị tasks sử dụng forEach
+    const taskContainer = document.getElementById('taskContainer');
     tasks.forEach((task, index) => {
-      const taskContainer = document.getElementById('taskContainer');
-
-      // Tạo phần tử div cho mỗi task
-      const taskDiv = document.createElement('div');
-      taskDiv.classList.add('task');
-
-      const taskInfoDiv = document.createElement('div');
-      taskInfoDiv.classList.add('taskInfo');
-
-      taskInfoDiv.innerHTML = `
-        <strong>${task.title}</strong><br>
-        Due Date: ${task.dueDate}<br>
-        Description: ${task.description}
-      `;
-
-      // Thêm div chứa thông tin vào taskDiv
-      taskDiv.appendChild(taskInfoDiv);
-
-      // Tạo div chứa các span của important và completed
-      const statusDiv = document.createElement('div');
-      statusDiv.classList.add('status');
-
-      // Kiểm tra isImportant và isCompleted để thêm chữ important và completed
-      if (task.isImportant) {
-        const importantSpan = document.createElement('span');
-        importantSpan.classList.add('important_task');
-        importantSpan.textContent = 'important';
-        statusDiv.appendChild(importantSpan);
-      }
-
-      if (task.isCompleted) {
-        const completedSpan = document.createElement('span');
-        completedSpan.classList.add('completed_task');
-        completedSpan.textContent = 'completed';
-        statusDiv.appendChild(completedSpan);
-      }
-
-      // Thêm div chứa status vào taskDiv
-      taskDiv.appendChild(statusDiv);
-
-      // Tạo div chứa các button
-      const actionButtonsDiv = document.createElement('div');
-      actionButtonsDiv.classList.add('action-buttons');
-
-      // Tạo button Update
-      const updateButton = document.createElement('button');
-      updateButton.classList.add('update');
-      updateButton.textContent = 'Update';
-      updateButton.addEventListener('click', () => openModal('modalUpdate' + index));
-
-      // Tạo button Delete
-      const deleteButton = document.createElement('button');
-      deleteButton.classList.add('delete');
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', () => openModal('modalDelete' + index));
-
-      // Thêm button vào div chứa các button
-      actionButtonsDiv.appendChild(updateButton);
-      actionButtonsDiv.appendChild(deleteButton);
-
-      // Thêm div chứa các button vào taskDiv
-      taskDiv.appendChild(actionButtonsDiv);
-
-      // Thêm taskDiv vào container
+      const taskDiv = createTaskElement(task, index);
       taskContainer.appendChild(taskDiv);
 
-      // Thêm modal Update
+      // Add Update modal
       const modalUpdate = createModal('modalUpdate' + index, 'Update Task', task);
       taskContainer.appendChild(modalUpdate);
-
-      // Thêm modal Delete
-      const modalDelete = createModal('modalDelete' + index, 'Delete Task', task);
-      taskContainer.appendChild(modalDelete);
     });
-
   } catch (error) {
     console.error('Error fetching data:', error);
   }
 }
+
+function createTaskElement(task, index) {
+  const taskDiv = document.createElement('div');
+  taskDiv.classList.add('task');
+  taskDiv.setAttribute('data-task-id', task.task_id);
+
+  const taskInfoDiv = document.createElement('div');
+  taskInfoDiv.classList.add('taskInfo');
+  taskInfoDiv.innerHTML = `
+    <strong>${task.title}</strong><br>
+    Due Date: ${task.dueDate}<br>
+    Description: ${task.description}
+  `;
+  taskDiv.appendChild(taskInfoDiv);
+
+  const statusDiv = document.createElement('div');
+  statusDiv.classList.add('status');
+  if (task.isImportant) {
+    const importantSpan = document.createElement('span');
+    importantSpan.classList.add('important_task');
+    importantSpan.textContent = 'important';
+    statusDiv.appendChild(importantSpan);
+  }
+  if (task.isCompleted) {
+    const completedSpan = document.createElement('span');
+    completedSpan.classList.add('completed_task');
+    completedSpan.textContent = 'completed';
+    statusDiv.appendChild(completedSpan);
+  }
+  taskDiv.appendChild(statusDiv);
+
+  const actionButtonsDiv = document.createElement('div');
+  actionButtonsDiv.classList.add('action-buttons');
+
+  const commentButton = createActionButton('Comment', () => {
+    localStorage.setItem("currentTask", task.task_id);
+    openCommentForm(task);
+  });
+
+  actionButtonsDiv.appendChild(commentButton);
+  taskDiv.appendChild(actionButtonsDiv);
+
+  // Create and append comments container
+  let commentContainer = taskDiv.querySelector('.comments');
+  if (!commentContainer) {
+    commentContainer = document.createElement('div');
+    commentContainer.classList.add('comments');
+    taskDiv.appendChild(commentContainer);
+  }
+
+  return taskDiv;
+}
+
+function createActionButton(text, onClick) {
+  const button = document.createElement('button');
+  button.textContent = text;
+  button.addEventListener('click', onClick);
+  button.classList.add('comment-button');
+  return button;
+}
+
 function createModal(modalId, modalTitle, task) {
-    const modal = document.createElement('div');
-    modal.classList.add('modal');
-    modal.id = modalId;
+  const modal = document.createElement('div');
+  modal.classList.add('modal');
+  modal.id = modalId;
 
-    const modalContent = document.createElement('div');
-    modalContent.classList.add('modal-content');
+  const modalContent = document.createElement('div');
+  modalContent.classList.add('modal-content');
+  modalContent.appendChild(createCloseButton(modalId));
 
-    const closeSpan = document.createElement('span');
-    closeSpan.className = 'close';
-    closeSpan.innerHTML = '&times;';
+  const modalTitleDiv = document.createElement('h2');
+  modalTitleDiv.textContent = modalTitle;
+  modalContent.appendChild(modalTitleDiv);
 
-    closeSpan.addEventListener('click', () =>closeModal(modalId));
-    modalContent.appendChild(closeSpan);
+  const modalForm = document.createElement('form');
+  modalForm.appendChild(createInput('Title', 'text', task.title));
+  modalForm.appendChild(createInput('Due Date', 'date', task.dueDate));
+  modalForm.appendChild(createInput('Description', 'text', task.description));
+  modalForm.appendChild(createInput('Is Important', 'checkbox', task.isImportant));
+  modalForm.appendChild(createInput('Is Completed', 'checkbox', task.isCompleted));
 
-    const modalTitleDiv = document.createElement('h2');
-    modalTitleDiv.textContent = modalTitle;
-    modalContent.appendChild(modalTitleDiv);
+  const saveButton = document.createElement('button');
+  saveButton.className = 'save-button';
+  saveButton.textContent = 'Save Update';
+  saveButton.addEventListener('click', (e) => {
+    e.preventDefault();
+    closeModal(modalId);
+  });
+  modalForm.appendChild(saveButton);
 
-    
-    const modalForm = document.createElement('form');
-    // modalForm.classList.add('form');
+  modalContent.appendChild(modalForm);
+  modal.appendChild(modalContent);
 
-    const inputTitle = createInput('Title', 'text', task.title);
-    inputTitle.className = 'newinfo';
-    modalForm.appendChild(inputTitle);
+  return modal;
+}
 
-    const inputDueDate = createInput('Due Date', 'date', task.dueDate);
-    inputDueDate.className = 'newinfo';
-    modalForm.appendChild(inputDueDate);
-
-    const inputDescription = createInput('Description', 'text', task.description);
-    inputDescription.className = 'newinfo';
-    modalForm.appendChild(inputDescription);
-
-    const inputIsImportant = createInput('Is Important', 'checkbox', task.isImportant);
-    inputIsImportant.className = 'newinfo';
-    modalForm.appendChild(inputIsImportant);
-
-    const inputIsCompleted = createInput('Is Completed', 'checkbox', task.isCompleted);
-    inputIsCompleted.className = 'newinfo';
-    modalForm.appendChild(inputIsCompleted);
-
-    if(modalTitle==='Update Task'){
-        const saveButton = document.createElement('button');
-        saveButton.className = 'save-button';
-        saveButton.textContent = 'Save Update';
-        saveButton.addEventListener('onclick', () => closeModal(modalId));
-        modalForm.appendChild(saveButton);
-    } else{
-        const deleteButton = document.createElement('button');
-        deleteButton.className = 'delete-button';
-        deleteButton.textContent = 'Delete Task';
-        deleteButton.addEventListener('onclick', () => closeModal(modalId));
-        modalForm.appendChild(deleteButton);
-    }
-
-    modalContent.appendChild(modalForm);
-    modal.appendChild(modalContent);
-
-    return modal;
+function createCloseButton(modalId) {
+  const closeSpan = document.createElement('span');
+  closeSpan.className = 'close';
+  closeSpan.innerHTML = '&times;';
+  closeSpan.addEventListener('click', () => closeModal(modalId));
+  return closeSpan;
 }
 
 function createInput(labelText, inputType, value) {
-    const inputDiv = document.createElement('div');
-    const label = document.createElement('label');
-    label.textContent = labelText + ':';
-    inputDiv.appendChild(label);
+  const inputDiv = document.createElement('div');
+  const label = document.createElement('label');
+  label.textContent = labelText + ':';
+  inputDiv.appendChild(label);
 
-    const input = document.createElement('input');
-    input.type = inputType;
-    if(input.type==='checkbox') {
-        if(value===1) {input.value=true;}
-        else {input.value=false;}
-    } else {
-        input.value = value;
-    }
+  const input = document.createElement('input');
+  input.type = inputType;
+  input.value = inputType === 'checkbox' ? value : value;
 
-    switch (labelText) {
-        case "Title":
-            input.id = "title";
-            break;
-        case "Due Date":
-            input.id = "dueDate";
-            break;
-        case "Description":
-            input.id = "description";
-            break;
-        case "Is Important":
-            input.id = "isImportant";
-            break;
-        // Thêm các trường hợp khác nếu cần
-        default:
-            input.id = 'isCompleted';
-    }
-    
-    inputDiv.appendChild(input);
+  switch (labelText) {
+    case "Title": input.id = "title"; break;
+    case "Due Date": input.id = "dueDate"; break;
+    case "Description": input.id = "description"; break;
+    case "Is Important": input.id = "isImportant"; break;
+    default: input.id = 'isCompleted';
+  }
 
-    return inputDiv;
+  inputDiv.appendChild(input);
+  return inputDiv;
 }
 
 function openModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'block';
+  document.getElementById(modalId).style.display = 'block';
 }
 
 function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    modal.style.display = 'none';
+  document.getElementById(modalId).style.display = 'none';
+}
+
+// Hàm mở form comment
+async function openCommentForm(task) {
+  const taskContainer = document.getElementById('taskContainer');
+  const taskId = task.task_id;
+
+  try {
+    const response = await fetch(`http://localhost:3001/api/comments/getAllComments/${taskId}`);
+    const comments = await response.json();
+    
+    const commentModal = createCommentModal(taskId);
+    taskContainer.appendChild(commentModal);
+
+    openModal('commentModal' + taskId);
+
+    // Hiển thị các comment hiện có
+    const commentDiv = document.createElement('div');
+    commentDiv.classList.add('comments');
+    comments.forEach(comment => {
+      const commentElement = document.createElement('div');
+      commentElement.classList.add('comment');
+      commentElement.innerHTML = `<strong>${comment.userId}</strong>: ${comment.comment}`;
+      commentDiv.appendChild(commentElement);
+    });
+    commentModal.querySelector('.modal-content').appendChild(commentDiv);
+  } catch (error) {
+    console.error('Error fetching comments:', error);
+  }
+}
+
+function createCommentModal(taskId) {
+  const commentModal = document.createElement('div');
+  commentModal.classList.add('modal');
+  commentModal.id = 'commentModal' + taskId;
+
+  const modalContent = document.createElement('div');
+  modalContent.classList.add('modal-content');
+  modalContent.appendChild(createCloseButton('commentModal' + taskId));
+
+  const modalTitleDiv = document.createElement('h2');
+  modalTitleDiv.textContent = 'Add Comment';
+  modalContent.appendChild(modalTitleDiv);
+
+  const commentForm = document.createElement('form');
+  const commentTextArea = document.createElement('textarea');
+  commentTextArea.placeholder = 'Write your comment here...';
+  commentForm.appendChild(commentTextArea);
+
+  const submitButton = document.createElement('button');
+  submitButton.textContent = 'Submit Comment';
+  submitButton.addEventListener('click', (event) => {
+    event.preventDefault();
+    saveComment(taskId, commentTextArea.value); // Lưu comment khi submit
+  });
+
+  commentForm.appendChild(submitButton);
+  modalContent.appendChild(commentForm);
+  commentModal.appendChild(modalContent);
+
+  return commentModal;
+}
+
+// Lưu comment vào server
+async function saveComment(taskId, comment) {
+  try {
+    const userId = localStorage.getItem('userID');
+    if (!userId || !comment) {
+      alert('User ID or comment is missing.');
+      return;
+    }
+
+    const response = await fetch('http://localhost:3001/api/comments/addComment/' + userId, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ taskId, comment }),
+    });
+
+    const responseData = await response.json();
+    if (responseData.success) {
+      alert('Comment submitted successfully!');
+      updateCommentInDOM(taskId, comment, responseData.userName);
+      closeModal('commentModal' + taskId);
+    } else {
+      alert('Failed to submit comment.');
+    }
+  } catch (error) {
+    console.error('Error saving comment:', error);
+    alert('There was an error saving the comment.');
+  }
+}
+
+function updateCommentInDOM(taskId, comment, userName) {
+  const taskDiv = document.querySelector(`#taskContainer .task[data-task-id='${taskId}'] .comments`);
+  if (taskDiv) {
+    const commentDiv = document.createElement('div');
+    commentDiv.classList.add('comment');
+    commentDiv.innerHTML = `<strong>${userName}</strong>: ${comment}`;
+    taskDiv.appendChild(commentDiv);
+  }
 }

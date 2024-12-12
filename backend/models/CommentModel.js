@@ -1,13 +1,23 @@
-// models/Comment.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const commentSchema = new mongoose.Schema(
   {
-    text: { type: String, required: true },
-    user: { type: String, required: true }, // Thông tin người bình luận
-    createdAt: { type: Date, default: Date.now }
+    userId: {
+      type: String,
+      required: true,
+    },
+    taskId: {
+      type: String,
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true } // Tự động thêm createdAt và updatedAt
 );
 
-module.exports = mongoose.model('Comment', commentSchema);
+const Comment = mongoose.model('Comment', commentSchema);
+
+export default Comment;
