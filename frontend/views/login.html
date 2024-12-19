@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="initial-scale=1, width=device-width" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ToDo|Login</title>
     <link rel="stylesheet" href="../public/css/global2.css" />
     <link rel="stylesheet" href="../public/css/login.css" />
@@ -12,44 +12,47 @@
     <div class="desktop">
       <header class="main">
         <div class="login-container">
-          <div class="logo-frame">  
+          <div class="logo-frame">
             <div class="logo">
-              <img class="logo-icon" loading="lazy" alt="" src="../public/images/logo.png"/>
-
+              <img class="logo-icon" loading="lazy" alt="" src="../public/images/logo.png" />
               <h1 class="travalizer">Login TODO</h1>
             </div>
           </div>
           <form class="login-form" id="form-login">
             <div class="form-group">
-              <label for="email" >Email</label>
-              <div class="email-input" >
-                <input class="form-control" type="email" id="email" name="email" required>
+              <label for="email">Email</label>
+              <div class="email-input">
+                <input class="form-control" type="email" id="email" name="email" required />
               </div>
             </div>
-            
+
             <div class="form-group">
               <label for="password">Password</label>
               <div class="password-input">
-                <input class="form-control" type="password" id="password" name="password" required>
+                <input class="form-control" type="password" id="password" name="password" required />
                 <button class="button-eye-off">
                   <img class="eye-off" alt="" src="../public/images/eye--off.svg" />
                 </button>
               </div>
             </div>
-            
+
             <div class="form-group">
-              <input class="check-box-default" checked="true" type="checkbox" id="remember_me">
+              <input class="check-box-default" checked="true" type="checkbox" id="remember_me" />
               <label class="remember" for="remember_me">Remember me</label>
             </div>
-          
+
             <div class="button">
               <button type="submit" class="login-button" id="login-button">Login</button>
               <button type="submit" class="signup-button" id="signup-button">Sign Up</button>
             </div>
           </form>
 
+          <div class="forgot-password-link">
+            <a href="forgotpassword.html">Forgot Password?</a>
+          </div>
+
         </div>
-        <img class="illustration-icon" loading="lazy" alt="" src="../public/images/pic3.jpg"/>
+        <img class="illustration-icon" loading="lazy" alt="" src="../public/images/pic3.jpg" />
 
         <script src="../public/js/login.js"></script>
       </header>

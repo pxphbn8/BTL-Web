@@ -13,12 +13,17 @@ import signupRoutes from './routes/signupRoute.js';
 import todayRoutes from './routes/todayRoute.js';
 import searchRoutes from './routes/searchRoute.js';
 import commentRoutes from './routes/commentRoute.js';
-// import Routes from './routes/uploadFileRoute.js';
+import Routes from './routes/uploadFileRoute.js';
+import router from './routes/forgotpasswordRoute.js';
+import dotenv from 'dotenv';
+dotenv.config();
+
 const app = express();
 
 
 // Cấu hình CORS theo nhu cầu của bạn
 app.use(cors());
+
 
 // Parse request bodies (req.body)
 app.use(express.json());
@@ -48,8 +53,8 @@ app.use('/api/signup', signupRoutes);
 app.use('/api/today', todayRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/comments', commentRoutes);
-// app.use('/api/uploadFile', Routes);
-
+app.use('/api/uploadfile', Routes);
+app.use('/api/auth', router);
 
 // Bình thường bạn sẽ muốn phục vụ static files cho Front-end ở đây
 // app.use(express.static(join(__dirname, '../Front-end')));

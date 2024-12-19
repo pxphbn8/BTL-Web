@@ -543,3 +543,13 @@ button:hover {
 }
 
 
+/* Hiệu ứng nhấp nháy cho icon cảnh báo */
+@keyframes blink-icon {
+  0% { opacity: 1; }
+  50% { opacity: 0.1; } /* Làm mờ icon tại 50% */
+  100% { opacity: 1; }
+}
+
+.alert-icon {
+  animation: blink-icon 1s infinite; /* Nhấp nháy liên tục mỗi 1 giây */
+}

@@ -1,3 +1,4 @@
+import { handleFileUpload } from './upload.js';
 let tasks;
 
 document.addEventListener('DOMContentLoaded', fetchDataFromServer);
@@ -49,7 +50,8 @@ function createTaskStatus(task) {
 
   const daysLeft = Math.floor((new Date(task.dueDate) - new Date()) / (1000 * 60 * 60 * 24));
   if (daysLeft <= 2 && !task.isCompleted) {
-    statusDiv.appendChild(createElement('span', { class: 'bi bi-exclamation-triangle alert-icon' }));
+    const alertIcon = createElement('span', { class: 'bi bi-exclamation-triangle alert-icon' });
+    statusDiv.appendChild(alertIcon);
   }
 
   if (task.isCompleted) {
@@ -109,15 +111,28 @@ function createModalForm(task, modalId) {
 }
 
 function createAttachmentForm(task) {
-  return createElement('form', {}, [
+  const form = createElement('form', {}, [
     createElement('input', { type: 'file', id: 'attachmentFile' }),
-    createButton('Upload', '', (e) => {
-      e.preventDefault();
-      const file = document.getElementById('attachmentFile').files[0];
-      handleFileUpload(file, task);
-    })
+    createButton('Upload', {id: 'attachmentFileBtn'}, (e) => handleClick(e, task))
   ]);
+
+  // Attach the onchange event to the file input after the form has been created
+  const fileInput = form.querySelector('#attachmentFile');
+  const fileBtn = form.querySelector("#attachmentFileBtn");
+
+  // Define handleClick function
+  const handleClick = (e, task) => {
+    e.preventDefault();
+    const selectedFile = fileInput?.files[0];
+    if (selectedFile) {
+      handleFileUpload(selectedFile, task);
+    } else {
+      console.log("No file selected");
+    }
+  };
+  return form;
 }
+
 
 async function updateTaskStatus(taskId, updatedData) {
   try {
@@ -130,44 +145,6 @@ async function updateTaskStatus(taskId, updatedData) {
     fetchDataFromServer(); // Reload tasks
   } catch (error) {
     console.error('Error updating task:', error);
-  }
-}
-
-async function handleFileUpload(file, task) {
-  if (file) {
-    try {
-      console.log(`Uploading file: ${file.name} for task: ${task.title}`);
-
-      const formData = new FormData();
-      formData.append('file', file); // Thêm tệp vào form data
-      formData.append('fileName', file.name); // Tên file (có thể lấy từ input hoặc thêm thông tin khác nếu cần)
-
-      const userID = localStorage.getItem('userID'); // Lấy userID từ localStorage
-
-      // Gửi tệp qua API để upload
-      const response = await fetch('http://localhost:3001/api/uploadFile/uploadfile', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${userID}` // Gửi userID (nếu có trong server)
-        },
-        body: formData,
-      });
-
-      const data = await response.json();
-      
-      if (data.success) {
-        console.log('File uploaded successfully:', data);
-        updateTaskStatus(task._id, { isCompleted: true }); // Cập nhật task là đã hoàn thành
-        fetchDataFromServer(); // Reload tasks
-      } else {
-        console.error('Error uploading file:', data.message);
-      }
-
-    } catch (error) {
-      console.error('Error uploading file:', error);
-    }
-  } else {
-    console.log('No file selected');
   }
 }
 

@@ -172,23 +172,14 @@ async function openCommentForm(task) {
 
   try {
     const response = await fetch(`http://localhost:3001/api/comments/getAllComments/${taskId}`);
-    const comments = await response.json();
+
     
     const commentModal = createCommentModal(taskId);
     taskContainer.appendChild(commentModal);
 
     openModal('commentModal' + taskId);
 
-    // Hiển thị các comment hiện có
-    const commentDiv = document.createElement('div');
-    commentDiv.classList.add('comments');
-    comments.forEach(comment => {
-      const commentElement = document.createElement('div');
-      commentElement.classList.add('comment');
-      commentElement.innerHTML = `<strong>${comment.userId}</strong>: ${comment.comment}`;
-      commentDiv.appendChild(commentElement);
-    });
-    commentModal.querySelector('.modal-content').appendChild(commentDiv);
+  
   } catch (error) {
     console.error('Error fetching comments:', error);
   }
