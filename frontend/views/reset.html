@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="../public/css/Reset.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reset Password</title>
+  <style>
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <h2>Reset Your Password</h2>
+    
+    <!-- Thông báo thành công hoặc lỗi -->
+    <p id="message"></p>
+    <p id="error" class="error"></p>
+    
+    <!-- Form reset mật khẩu -->
+    <form id="reset-password-form">
+      <div>
+        <label for="new-password">New Password</label>
+        <input
+          type="password"
+          id="new-password"
+          required
+        />
+      </div>
+      <div>
+        <label for="confirm-password">Confirm Password</label>
+        <input
+          type="password"
+          id="confirm-password"
+          required
+        />
+      </div>
+      <button type="submit">Reset Password</button>
+    </form>
+  </div>
+
+  <script src="../public/js/ResetPassword.js"></script>
+  
+
+</body>
+</html>

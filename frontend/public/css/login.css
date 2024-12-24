@@ -302,3 +302,12 @@ input {
 .illustration-icon {
   height: 475px; /* Độ cao mong muốn */
 }
+
+.forgot-password-link a {
+  text-decoration: none;
+}
+
+.forgot-password-link a:hover {
+  text-decoration: none;
+  color: #0056b3;
+}

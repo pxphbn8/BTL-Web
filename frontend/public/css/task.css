@@ -290,6 +290,37 @@
   /* z-index: 1; */
 }
 
+.due-icon {
+  border-radius: var(--br-11xs);
+  width: 5vw;
+  height: 5vh;
+  min-height: 5vh;
+}
+
+.due,
+.due-icon {
+  position: relative;
+  /* z-index: 1; */
+}
+
+.due-box,
+.sidebar-frame {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+.due-box {
+  border-radius: var(--br-3xs);
+  background-color: #EBD9B4;
+  width: 100%;
+  flex-direction: row;
+  padding: var(--padding-7xs) var(--padding-base) var(--padding-6xs);
+  gap: var(--gap-7xl);
+  /* z-index: 1; */
+}
+
   /* Thanh chức năng */
   .sidebar-frame {
     position: absolute;
