@@ -16,7 +16,6 @@ import commentRoutes from './routes/commentRoute.js';
 import Routes from './routes/uploadFileRoute.js';
 import router from './routes/forgotpasswordRoute.js';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 const app = express();

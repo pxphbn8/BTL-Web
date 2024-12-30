@@ -1,7 +1,6 @@
 import nodemailer from 'nodemailer';
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
-import User from '../models/userModel.js'; // Đường dẫn model User
+import User from '../models/userModel.js';
 
 // Hàm gửi email quên mật khẩu
 export const forgotPassword = async (req, res) => {
@@ -13,13 +12,22 @@ export const forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
+    console.log(user);
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
+      return res.status(401).json({ success: false, message: 'User not found.' });
+    }
+    if (!user.isActive) {
+      return res.status(401).json({ success: false, message: 'User not active.' });
     }
 
     // Tạo token đặt lại mật khẩu
     const resetToken = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const resetLink = `http://127.0.0.1:5500/frontend/views/reset.html?`;
+    const resetLink = `http://127.0.0.1:${process.env.PORT}/api/auth/verify-reset-password/${resetToken}`;
+
+    // Lưu token vào cơ sở dữ liệu
+    user.resetToken = resetToken;
+    user.tokenExpiry = Date.now() + 3600000; // 1 giờ
+    await user.save();
 
     // Cấu hình email
     const transporter = nodemailer.createTransport({
@@ -42,44 +50,5 @@ export const forgotPassword = async (req, res) => {
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ success: false, message: 'Failed to send password reset email.' });
-  }
-};
-
-// Hàm đặt lại mật khẩu
-export const resetPassword = async (req, res) => {
-  // const { token, newPassword } = req.body;
-  const token = req.query.token;
-  
-
-  if (!token || !newPassword) {
-    return res.status(400).json({ success: false, message: 'Token and new password are required.' });
-  }
-
-  try {
-    // Xác minh token
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found.' });
-    }
-
-    // Mã hóa mật khẩu mới
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-
-    // Cập nhật mật khẩu
-    user.password = hashedPassword;
-    await user.save();
-
-    res.status(200).json({ success: true, message: 'Password reset successfully.' });
-  } catch (error) {
-    console.error('Error resetting password:', error);
-
-    if (error.name === 'TokenExpiredError') {
-      return res.status(400).json({ success: false, message: 'Token has expired.' });
-    }
-
-    res.status(500).json({ success: false, message: 'Failed to reset password. Please try again.' });
   }
 };
