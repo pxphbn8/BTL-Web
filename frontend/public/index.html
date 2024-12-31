@@ -1,17 +1,42 @@
-import express from 'express';
-import path from 'path';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo Application</title>
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./css/global.css">
+    <link rel="stylesheet" href="./css/home.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css">
+</head>
+<body>
+    <div class="main-screen">
+        <div class="top-navigation-bar">
+            <div class="title-box">
+                <h1>ToDo Application</h1>
+            </div>
+        </div>
 
-const app = express();
+        <div class="sidebar-frame">
+            <div class="todo-bar-frame">
+                <img class="icon" loading="eager" src="./images/logo.png" />
+                <div class="to-do"><a href="./views/login.html" class="hyperhome">LOGIN</a></div>
+            </div>
+            <div class="tasks-box"><a href="./views/task.html" class="hyper">Tasks</a></div>
+            <div class="important-box"><a href="./views/important.html" class="hyper">Important</a></div>
+            <div class="completed-box"><a href="./views/completed.html" class="hyper">Completed</a></div>
+            <div class="today-box"><a href="./views/today.html" class="hyper">Today</a></div>
+            <div class="search-box"><a href="./views/search.html" class="hyper">Search</a></div>
+            <div class="comment-box"><a href="./views/comment.html" class="hyper">Comment</a></div>
+            <div class="file-box"><a href="./views/uploadfile.html" class="hyper">File</a></div>
+            <div class="due-box"><a href="./views/Overdue.html" class="hyper">Overdue</a></div>
+        </div>
 
-// Cấu hình để phục vụ tệp tĩnh từ thư mục 'public' hoặc 'build' nếu bạn sử dụng React
-app.use(express.static(path.join(__dirname, 'public')));
+        <div class="task-manage">
+            <h2>Welcome to the ToDo Application!</h2>
+            <p>Select a section from the sidebar to navigate.</p>
+        </div>
+    </div>
 
-// Định nghĩa route cho trang chủ '/'
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));  // Đảm bảo rằng có file index.html trong thư mục public
-});
-
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+</body>
+</html>

@@ -29,13 +29,14 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Kết nối đến cơ sở dữ liệu MongoDB
-const MONGO_URI = 'mongodb://localhost:27017/ToDoListDB'; // Thay thế bằng địa chỉ MongoDB của bạn
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// // Kết nối đến cơ sở dữ liệu MongoDB
+// const MONGO_URI = 'mongodb://localhost:27017/ToDoListDB';
+// mongoose.connect(MONGO_URI, {
+//   useNewUrlParser: true,
+//   useUnifiedTopology: true,
  
-});
+// });
+mongoose.connect('mongodb://localhost:27017/ToDoListDB');
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
@@ -57,8 +58,6 @@ app.use('/api/uploadfile', Routes);
 app.use('/api/auth', router);
 
 
-// Bình thường bạn sẽ muốn phục vụ static files cho Front-end ở đây
-// app.use(express.static(join(__dirname, '../Front-end')));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {

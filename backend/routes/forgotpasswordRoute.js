@@ -4,7 +4,7 @@ import { resetPassword } from '../controllers/resetpasswordController.js';
 import jwt from 'jsonwebtoken'; 
 import User from '../models/userModel.js';
 import path from 'path';
-import { fileURLToPath } from 'url'; // Để dùng __dirname trong ES Module
+import { fileURLToPath } from 'url'; 
 import fs from 'fs'; // Để đọc file HTML
 
 const router = express.Router();
@@ -39,7 +39,7 @@ router.get('/verify-reset-password/:token', async (req, res) => {
     }
 
     // Token hợp lệ, trả về trang HTML
-    const resetHtmlPath = path.resolve(__dirname, '../../frontend/views/reset.html');
+    const resetHtmlPath = path.resolve(__dirname, '../../frontend/public/views/reset.html');
     console.log("Path to reset.html:", resetHtmlPath);
    // Đọc nội dung của file HTML và chèn token vào
    const htmlContent = fs.readFileSync(resetHtmlPath, 'utf-8');
