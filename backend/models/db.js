@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 
 const dbConfig = {
-    connectionString: 'mongodb://localhost:27017', // Đổi thông tin kết nối tới MongoDB
-    dbName: 'ToDoListDB', // Đổi tên cơ sở dữ liệu nếu cần
+    connectionString: 'mongodb://localhost:27017', 
+    dbName: 'ToDoListDB', 
 };
 
 const connectToMongoDB = async () => {

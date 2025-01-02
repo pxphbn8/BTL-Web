@@ -104,7 +104,7 @@ function updateUserInfo(info) {
 
     const data = {
       name: username,
-      // email: email,
+      email: email,
       personalInfo: personalInfo
     };
     console.log(data);

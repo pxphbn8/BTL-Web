@@ -1,4 +1,4 @@
-import User from '../models/userModel.js'; // Import User model (đảm bảo bạn đã định nghĩa Model cho người dùng)
+import User from '../models/userModel.js'; 
 
 // Hàm hiển thị thông tin người dùng dựa trên email
 export const getInfo = async (req, res) => {

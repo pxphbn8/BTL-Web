@@ -15,7 +15,7 @@ const commentSchema = new mongoose.Schema(
       required: true,
     },
   },
-  { timestamps: true } // Tự động thêm createdAt và updatedAt
+  { timestamps: true } 
 );
 
 const Comment = mongoose.model('Comment', commentSchema);

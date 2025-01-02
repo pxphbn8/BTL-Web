@@ -1,10 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import bodyParser from "body-parser";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
 import mongoose from 'mongoose';
-import taskRoutes from './routes/taskRoute.js'; // Đảm bảo rằng đường dẫn đến file route là đúng
+import dotenv from 'dotenv';
+
+// Import các models
+import User from './models/userModel.js';
+import Task from './models/taskModel.js';
+import Comment from './models/CommentModel.js';
+import UploadFile from './models/uploadFile.js'; 
+
+// Import các routes
+import taskRoutes from './routes/taskRoute.js'; 
 import homeRoutes from './routes/homeRoute.js';
 import importantRoutes from './routes/importantRoute.js';
 import completedRoutes from './routes/completedRoute.js';
@@ -13,38 +19,32 @@ import signupRoutes from './routes/signupRoute.js';
 import todayRoutes from './routes/todayRoute.js';
 import searchRoutes from './routes/searchRoute.js';
 import commentRoutes from './routes/commentRoute.js';
-import Routes from './routes/uploadFileRoute.js';
-import router from './routes/forgotpasswordRoute.js';
-import dotenv from 'dotenv';
+import uploadFileRoutes from './routes/uploadFileRoute.js';
+import forgotPasswordRoutes from './routes/forgotpasswordRoute.js';
+
+// Load biến môi trường từ file .env
 dotenv.config();
 
 const app = express();
 
-
-// Cấu hình CORS theo nhu cầu của bạn
+// Cấu hình CORS
 app.use(cors());
 
-
-// Parse request bodies (req.body)
+// Middleware để parse body của request
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// // Kết nối đến cơ sở dữ liệu MongoDB
-// const MONGO_URI = 'mongodb://localhost:27017/ToDoListDB';
-// mongoose.connect(MONGO_URI, {
-//   useNewUrlParser: true,
-//   useUnifiedTopology: true,
- 
-// });
-mongoose.connect('mongodb://localhost:27017/ToDoListDB');
-
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
+// Kết nối MongoDB
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
   console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('MongoDB connection error:', err);
 });
 
-// Sử dụng router cho các endpoint của Task
+// Đăng ký các routes
 app.use('/api/tasks', taskRoutes);
 app.use('/api/home', homeRoutes);
 app.use('/api/important', importantRoutes);
@@ -54,14 +54,31 @@ app.use('/api/signup', signupRoutes);
 app.use('/api/today', todayRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/comments', commentRoutes);
-app.use('/api/uploadfile', Routes);
-app.use('/api/auth', router);
+app.use('/api/uploadfile', uploadFileRoutes);
+app.use('/api/auth', forgotPasswordRoutes);
 
+// Route mặc định trả về toàn bộ dữ liệu
+app.get('/', async (req, res) => {
+  try {
+    const tasks = await Task.find().populate('user_id', 'name email'); 
+    const users = await User.find();
+    const comments = await Comment.find();
+    const files = await UploadFile.find();
 
+    res.json({
+      tasks: tasks,
+      users: users,
+      comments: comments,
+      files: files
+    });
+  } catch (err) {
+    console.error('Error fetching data:', err); // Log lỗi chi tiết
+    res.status(500).json({ error: 'Failed to fetch data', details: err.message });
+  }
+});
 
+// Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
-

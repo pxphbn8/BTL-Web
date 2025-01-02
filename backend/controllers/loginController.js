@@ -19,8 +19,6 @@ export const checkLogin = async (req, res) => {
       console.log("101");
       return res.status(401).json({ message: "Invalid password." });
     } else{
-    // Nếu tìm thấy user và password khớp, trả về user thông qua response
-      // console.log(user.email);
       res.status(200).json(user._id);
     }
   } catch (error) {

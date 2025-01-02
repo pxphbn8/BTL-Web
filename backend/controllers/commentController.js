@@ -1,10 +1,10 @@
-import Comment from '../models/CommentModel.js'; // Import model tương ứng
+import Comment from '../models/CommentModel.js'; 
 
 
 // Lấy tất cả các bình luận của một người dùng
 export const getAllComments = async (req, res) => {
   try {
-    const { userID } = req.params; // Lấy userID từ URL
+    const { userID } = req.params; 
 
     // Sửa lại cú pháp populate đúng
     const comments = await Comment.find({ userId: userID })

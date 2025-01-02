@@ -13,14 +13,13 @@ export const searchTask = async (req, res) => {
     const tasks = await Task.find({
       user_id: user_ID,
       $or: [
-        // Tìm các công việc có tiêu đề chứa searchInput (không phân biệt chữ hoa chữ thường)
+ 
         { title: { $regex: new RegExp(search_Input, 'i') } },
         // Tìm các công việc có mô tả chứa searchInput (không phân biệt chữ hoa chữ thường)
         { description: { $regex: new RegExp(search_Input, 'i') } },
-        // Tìm các công việc có dueDate chứa searchInput
-        // { dueDate: search_Input }
+    
       ],
-    }).sort({ dueDate: 1 }); // Sắp xếp kết quả theo dueDate tăng dần
+    }).sort({ dueDate: 1 }); 
 
     // Trả về danh sách các công việc tìm thấy dưới dạng JSON
     res.status(200).json(tasks);

@@ -418,6 +418,10 @@
     border: 1px solid #ddd;
     padding: 8px;
     text-align: left;
+    word-wrap: break-word;
+    white-space: normal;
+    max-width: 20px;
+    min-height: 50px;
   }
   
   .file-table th {

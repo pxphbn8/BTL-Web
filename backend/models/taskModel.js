@@ -12,7 +12,6 @@ const taskSchema = new mongoose.Schema({
   isImportant: Boolean,
   dueDate: {
     type: Date,
-    // Đảm bảo chỉ lưu trữ ngày tháng năm mà không có giờ phút giây
     get: (value) => value.toISOString().slice(0, 10), // Chuyển đổi thành chuỗi ngày tháng năm
     set: (value) => new Date(value) // Chuyển đổi chuỗi ngày tháng năm thành đối tượng Date
   },

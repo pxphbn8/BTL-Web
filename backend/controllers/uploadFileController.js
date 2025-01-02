@@ -1,7 +1,7 @@
 import multer from 'multer';
 import path from 'path';
 import fs from 'fs';
-import uploadFile from '../models/uploadFile.js'; // Model file MongoDB
+import uploadFile from '../models/uploadFile.js'; 
 
 // Cấu hình lưu trữ cho multer
 const storage = multer.diskStorage({
